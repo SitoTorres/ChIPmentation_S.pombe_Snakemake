@@ -1,0 +1,127 @@
+#### STG_Snakefile_ChIPmentation_Sp_2024 ####
+
+homedir="/path/to/working/dir/"
+
+rule cutadapt_input:
+    input: 
+        P1 = homedir+"{sample}_input_R1.fq.gz",
+        P2 = homedir+"{sample}_input_R2.fq.gz",
+    output:
+        TP1 = homedir+"{sample}_input_R1_trimmed.fq.gz",
+        TP2 = homedir+"{sample}_input_R2_trimmed.fq.gz",
+    resources:
+        tmpdir = homedir+"tmp/",
+    shell:
+        "cutadapt -a CTGTCTCTTATACACATCT -A CTGTCTCTTATACACATCT -o {output.TP1} -p {output.TP2} {input.P1} {input.P2}"
+   
+    # -a CTGTCTCTTATACACATCT  remove nextera sequence from 3' of Read 1 (forward)
+    # -A CTGTCTCTTATACACATCT  remove nextera sequence from 3' of Read 2 (reverse)
+    # -o out.1.fastq 
+    # -p out.2.fastq
+    # reads.1.fastq 
+    # reads.2.fastq
+
+rule cutadapt_IP:
+    input: 
+        P1 = homedir+"{sample}_IP_R1.fq.gz",
+        P2 = homedir+"{sample}_IP_R2.fq.gz",
+    output:
+        TP1 = homedir+"{sample}_IP_R1_trimmed.fq.gz",
+        TP2 = homedir+"{sample}_IP_R2_trimmed.fq.gz",
+    resources:
+        tmpdir = homedir+"tmp/",
+    shell:
+        "cutadapt -a CTGTCTCTTATACACATCT -A CTGTCTCTTATACACATCT -o {output.TP1} -p {output.TP2} {input.P1} {input.P2}"
+   
+    # -a CTGTCTCTTATACACATCT  remove nextera sequence from 3' of Read 1 (forward)
+    # -A CTGTCTCTTATACACATCT  remove nextera sequence from 3' of Read 2 (reverse)
+    # -o out.1.fastq 
+    # -p out.2.fastq
+    # reads.1.fastq 
+    # reads.2.fastq
+
+rule BWA_and_sort_input:
+    input: 
+        P1 = homedir+"{sample}_input_R1_trimmed.fq.gz",
+        P2 = homedir+"{sample}_input_R2_trimmed.fq.gz",
+    output:
+        TP1 = homedir+"{sample}_input_sorted.bam",
+    resources:
+        tmpdir = homedir+"tmp/",
+    shell:
+        "bwa mem /path/to/indexes/ASM294v2.22 {input.P1} {input.P2} | samtools view -bS - | samtools sort - -o {output.TP1}"
+
+rule BWA_and_sort_IP:
+    input: 
+        P1 = homedir+"{sample}_IP_R1_trimmed.fq.gz",
+        P2 = homedir+"{sample}_IP_R2_trimmed.fq.gz",
+    output:
+        TP1 = homedir+"{sample}_IP_sorted.bam",
+    resources:
+        tmpdir = homedir+"tmp/",
+    shell:
+        "bwa mem /path/to/indexes/ASM294v2.22 {input.P1} {input.P2} | samtools view -bS - | samtools sort - -o {output.TP1}"
+
+rule index_sorted_bam_input:
+    input:
+        homedir+"{sample}_input_sorted.bam",
+    output:
+        homedir+"{sample}_input_sorted.bam.bai",
+    resources:
+        tmpdir = homedir+"tmp/",
+    shell:
+       "samtools index {input} {output}"
+
+rule index_sorted_bam_IP:
+    input:
+        homedir+"{sample}_IP_sorted.bam",
+    output:
+        homedir+"{sample}_IP_sorted.bam.bai",
+    resources:
+        tmpdir = homedir+"tmp/",
+    shell:
+       "samtools index {input} {output}"
+
+rule sorted_bam_to_bigWig_input:
+    input:
+        B1 = homedir+"{sample}_input_sorted.bam",
+        B2 = homedir+"{sample}_input_sorted.bam.bai",
+    output:
+        homedir+"{sample}_input.bw",
+    resources:
+        tmpdir = homedir+"tmp/",
+    shell:
+        "bamCoverage -b {input.B1} -o {output} --normalizeUsing BPM"
+
+rule sorted_bam_to_bigWig_IP:
+    input:
+        B1 = homedir+"{sample}_IP_sorted.bam",
+        B2 = homedir+"{sample}_IP_sorted.bam.bai",
+    output:
+        homedir+"{sample}_IP.bw",
+    resources:
+        tmpdir = homedir+"tmp/",
+    shell:
+        "bamCoverage -b {input.B1} -o {output} --normalizeUsing BPM"
+
+
+rule sorted_bams_to_ratio_input_IP_bigWig:
+    input:
+        B1 = homedir+"{sample}_input_sorted.bam",
+        B2 = homedir+"{sample}_input_sorted.bam.bai",
+        B3 = homedir+"{sample}_IP_sorted.bam",
+        B4 = homedir+"{sample}_IP_sorted.bam.bai",
+    output:
+        homedir+"{sample}.bw",
+    resources:
+        tmpdir = homedir+"tmp/",
+    shell:
+        "bamCompare -b1 {input.B3} -b2 {input.B1} -o {output} --normalizeUsing BPM"
+
+
+
+
+
+
+
+
