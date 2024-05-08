@@ -6,6 +6,12 @@ Requires cutadapt, BWA, samtools (view, sort, index), deepTools (bamCoverage and
 
 To run the pipeline:
 
+For individual input and IP bigwigs:
+
+snakemake --snakefile STG_Snakefile_ChIPmentation_Sp_2024 /working/dir/{sample1,sample2,sampleX}_{input,IP}.bw
+
+For normalised ratios IP/input:
+
 snakemake --snakefile STG_Snakefile_ChIPmentation_Sp_2024 /working/dir/{sample1,sample2,sampleX}.bw
 
 # input file names should follow the pattern:
